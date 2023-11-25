@@ -1,11 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const auth = require('./middlewares/auth');
 const cookieParser = require('cookie-parser');
 const { celebrate, Joi, errors } = require('celebrate');
-const {createUser, signout} = require("./controllers/users");
-const {login} = require("./controllers/users");
+const auth = require('./middlewares/auth');
+const { createUser, signout } = require('./controllers/users');
+const { login } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
@@ -15,13 +15,15 @@ const MONGODB_URI = 'mongodb://localhost:27017/bitfilmsdb';
 // Подключение к MongoDB
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
 const db = mongoose.connection;
 
+// eslint-disable-next-line no-console
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => {
+  // eslint-disable-next-line no-console
   console.log('Connected to MongoDB');
 });
 
@@ -44,7 +46,7 @@ app.post(
       password: Joi.string().required(),
     }),
   }),
-  login
+  login,
 );
 
 // Обработчики для создания пользователя
@@ -57,7 +59,7 @@ app.post(
       password: Joi.string().required(),
     }),
   }),
-  createUser
+  createUser,
 );
 
 app.post('/signout', signout);
@@ -66,6 +68,7 @@ app.use(errorLogger); // подключаем логгер ошибок
 
 app.use(errors()); // обработчик ошибок celebrate
 
+/* eslint-disable-next-line no-unused-vars */
 app.use((err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500
   const { statusCode = 500, message } = err;
@@ -80,6 +83,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Server is running on port ${PORT}`);
 });
-

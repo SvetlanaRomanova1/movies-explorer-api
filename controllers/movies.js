@@ -5,7 +5,7 @@ const ForbiddenError = require('../errors/forbidden-error');
 // Контроллер для получения всех сохранённых текущим пользователем фильмов
 const getMovies = async (req, res, next) => {
   try {
-    const movies = await Movie.find({owner: req.user._id});
+    const movies = await Movie.find({ owner: req.user._id });
     res.status(200).json(movies);
   } catch (error) {
     next(error);
@@ -26,7 +26,7 @@ const createMovie = async (req, res, next) => {
       nameRU,
       nameEN,
       thumbnail,
-      movieId
+      movieId,
     } = req.body;
 
     const movie = await Movie.create({
@@ -41,14 +41,14 @@ const createMovie = async (req, res, next) => {
       nameEN,
       thumbnail,
       movieId,
-      owner: req.user._id
+      owner: req.user._id,
     });
     res.status(201).json(movie);
-  }catch (error){
+  } catch (error) {
     if (error.name === 'ValidationError') {
       res.status(400).json({ error: error.message });
     }
-    next(error)
+    next(error);
   }
 };
 
@@ -56,7 +56,8 @@ const createMovie = async (req, res, next) => {
 const deleteMovie = async (req, res, next) => {
   try {
     const movie = await Movie.findById(req.params.movieId);
-    console.log({movie, movieId: req.params.movieId})
+    // eslint-disable-next-line no-console
+    console.log({ movie, movieId: req.params.movieId });
     if (!movie) {
       throw new NotFoundError('Фильм не найден');
     }
@@ -70,4 +71,4 @@ const deleteMovie = async (req, res, next) => {
   }
 };
 
-module.exports = {getMovies, createMovie, deleteMovie};
+module.exports = { getMovies, createMovie, deleteMovie };

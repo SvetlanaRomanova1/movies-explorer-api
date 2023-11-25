@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const movieSchema = new mongoose.Schema({
   country: {
     type: String,

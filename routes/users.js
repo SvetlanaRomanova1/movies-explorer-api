@@ -9,5 +9,4 @@ router.get('/me', getUserInfo);
 // обновляет информацию о пользователе (email и имя)
 router.patch('/me', updateUser);
 
-
 module.exports = router;
