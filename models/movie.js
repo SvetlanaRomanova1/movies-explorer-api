@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const urlRegex = /^(https?:\/\/(www\.)?([a-zA-z0-9-]{1}[a-zA-z0-9-]*\.?)*\.{1}([a-zA-z0-9]){2,8}(\/?([a-zA-z0-9-])*\/?)*\/?([-._~:?#[]@!\$&'\(\)\*\+,;=])*)/;
+
 const movieSchema = new mongoose.Schema({
   country: {
     type: String,
@@ -24,14 +26,32 @@ const movieSchema = new mongoose.Schema({
   image: {
     type: String,
     required: true,
+    validate: {
+      validator(value) {
+        return urlRegex.test(value);
+      },
+      message: 'Invalid image URL',
+    },
   },
   trailerLink: {
     type: String,
     required: true,
+    validate: {
+      validator(value) {
+        return urlRegex.test(value);
+      },
+      message: 'Invalid trailerLink URL',
+    },
   },
   thumbnail: {
     type: String,
     required: true,
+    validate: {
+      validator(value) {
+        return urlRegex.test(value);
+      },
+      message: 'Invalid thumbnail URL',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const AuthorisationError = require('../errors/unauthorized-error');
 const { JWT_SECRET } = require('../utils/config');
-const BadRequestError = require('../errors/bad-request-error');
+const Conflict = require('../errors/conflict-error');
 
 // Контроллер для получения пользователей
 const getUserInfo = async (req, res, next) => {
@@ -23,7 +23,7 @@ const updateUser = async (req, res, next) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
-      throw new BadRequestError('Электронная почта уже используется другим пользователем.');
+      throw new Conflict('Электронная почта уже используется другим пользователем.');
     }
 
     // Обновление пользователя
@@ -49,6 +49,14 @@ const createUser = async (req, res, next) => {
 
     // Хеширование пароля
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Проверка, существует ли пользователь с новым email
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      throw new Conflict('Электронная почта уже используется другим пользователем.');
+    }
+
     // Создание нового пользователя в базе данных
     const user = await User.create({ email, password: hashedPassword, name });
 
