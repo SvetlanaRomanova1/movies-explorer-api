@@ -1,6 +1,7 @@
 const Movie = require('../models/movie');
 const NotFoundError = require('../errors/not-found-error');
 const ForbiddenError = require('../errors/forbidden-error');
+const BadRequestError = require('../errors/bad-request-error');
 
 // Контроллер для получения всех сохранённых текущим пользователем фильмов
 const getMovies = async (req, res, next) => {
@@ -43,12 +44,14 @@ const createMovie = async (req, res, next) => {
       movieId,
       owner: req.user._id,
     });
+
     res.status(201).json(movie);
   } catch (error) {
     if (error.name === 'ValidationError') {
-      res.status(400).json({ error: error.message });
+      next(new BadRequestError('Переданы некорректные данные в метод создания фильма.'));
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -56,8 +59,6 @@ const createMovie = async (req, res, next) => {
 const deleteMovie = async (req, res, next) => {
   try {
     const movie = await Movie.findById(req.params.movieId);
-    // eslint-disable-next-line no-console
-    console.log({ movie, movieId: req.params.movieId });
     if (!movie) {
       throw new NotFoundError('Фильм не найден');
     }
@@ -67,7 +68,11 @@ const deleteMovie = async (req, res, next) => {
     await Movie.deleteOne(movie);
     res.status(200).json({ message: 'Фильм успешно удалён' });
   } catch (error) {
-    next(error);
+    if (error.name === 'CastError') {
+      next(new BadRequestError('Переданы некорректные данные в метод удаления фильма.'));
+    } else {
+      next(error);
+    }
   }
 };
 

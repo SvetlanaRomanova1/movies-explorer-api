@@ -4,6 +4,7 @@ const User = require('../models/user');
 const AuthorisationError = require('../errors/unauthorized-error');
 const { JWT_SECRET } = require('../utils/config');
 const Conflict = require('../errors/conflict-error');
+const BadRequestError = require('../errors/bad-request-error');
 
 // Контроллер для получения пользователей
 const getUserInfo = async (req, res, next) => {
@@ -19,12 +20,6 @@ const getUserInfo = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { email, name } = req.body;
-    // Проверка, существует ли пользователь с новым email
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
-      throw new Conflict('Электронная почта уже используется другим пользователем.');
-    }
 
     // Обновление пользователя
     const updatedUser = await User.findByIdAndUpdate(
@@ -34,7 +29,13 @@ const updateUser = async (req, res, next) => {
     );
     res.status(200).json({ email: updatedUser.email, name: updatedUser.name });
   } catch (error) {
-    next(error);
+    if (error.name === 'ValidationError') {
+      next(new BadRequestError('Введены некорректные данные'));
+    } else if (error.code === 11000) {
+      next(new Conflict('Такой пользователь уже существует!'));
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -50,19 +51,18 @@ const createUser = async (req, res, next) => {
     // Хеширование пароля
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Проверка, существует ли пользователь с новым email
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      throw new Conflict('Электронная почта уже используется другим пользователем.');
-    }
-
     // Создание нового пользователя в базе данных
     const user = await User.create({ email, password: hashedPassword, name });
 
     res.status(201).json({ _id: user._id, email: user.email, name: user.name });
   } catch (error) {
-    next(error);
+    if (error.name === 'ValidationError') {
+      next(new BadRequestError('Введены некорректные данные'));
+    } else if (error.code === 11000) {
+      next(new Conflict('Такой пользователь уже существует!'));
+    } else {
+      next(error);
+    }
   }
 };
 

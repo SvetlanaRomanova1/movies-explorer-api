@@ -1,5 +1,6 @@
 const express = require('express');
 const { getUserInfo, updateUser } = require('../controllers/users');
+const { userValidate } = require('../middlewares/validation');
 
 const router = express.Router();
 
@@ -7,6 +8,6 @@ const router = express.Router();
 router.get('/me', getUserInfo);
 
 // обновляет информацию о пользователе (email и имя)
-router.patch('/me', updateUser);
+router.patch('/me', userValidate, updateUser);
 
 module.exports = router;
